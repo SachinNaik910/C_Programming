@@ -1,0 +1,13 @@
+February March April May June July August September October November December January
+   28      31    30   31  30   31    31     30        31      30        31       31
+
+Professtional skills:
+1)C programming
+2)Linux internals
+3)Embedded system board bring up. 
+4)Microcontroller,drivers.
+
+GT:
+Feb+Mar+Apr+May=AE+EDC+EMT
+
+
