@@ -1,4 +1,4 @@
-/* EOF */
+/* EOF Ctrl+D i linux and Ctrl+z in window*/
 #include <stdio.h>
 
 main()
