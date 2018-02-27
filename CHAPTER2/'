@@ -1,0 +1,11 @@
+/* Size of name of variable is to check*/
+#include <stdio.h>
+
+main()
+{
+    char qwertyuiopasdfghjklzxcvbnmmnbvcxz = '5';
+    char qwertyuiopasdfghjklzxcvbnmmnbvczx = '6';
+   
+    printf("first var = %d second var = %d\n",qwertyuiopasdfghjklzxcvbnmmnbvcxz,qwertyuiopasdfghjklzxcvbnmmnbvczx);
+    return 0;
+}

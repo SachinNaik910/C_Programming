@@ -1,0 +1,13 @@
+                     CHAPTER-1
+automatic henceforth to refer to these local variables
+
+Precision is the no of digits after point in fraction place.
+  Eg:1-precision 25.6
+
+SIZE OF VARIABLE
+int   =       4 float      =       4    char       =       1
+long  =       8 long int   =       8    long long  =       8
+doulbe=       8 long double=      16    double long=      16    short=       2
+
+Names in different enumerations must be distinct. Values need not be distinct
+in the same enumeration.
