@@ -1,0 +1,131 @@
+        HEADER FILE
+stdio.h
+stdlib.h
+ctype.h     ->getch,getchar,ungetch()
+string.h 
+
+        SORTING
+Binary sorting
+Quick sort
+
+
+		CHAPTER 1
+1)a[0] = 8
+  printf("a[0]=%d ++a[0]=%d",a[0],++a[0]); /*Output 9 9
+  Here print will from left to right ++a[0]=++8=9
+  
+2)'A','\n' =>%c normal char value:%d char constant ASCII
+  "\n","a" =>%s normal replecement:%d junk value
+  
+3)atoi -> string to integer 
+
+4)ctype.h
+ toupper,tolower,isdigit etc
+ 
+5)Convertion of type based on operands
+
+6)-1L < 1U
+  -1L > 1UL  =>signed is converted to unsigned
+  
+7)prinf is not a part of C but a header file
+
+8) precision %x.y => min x width including sign and fraction part.only y no of digits will be printed
+
+9)%d %f %ld %O %xhh %Xhh %%->%
+
+10)Mafic no-> any constant value in code
+
+11)#define EOF -1 -->in stdio.h all symbolic const in caps
+
+12)Isolated semi-colon is null statement.Eg:for(;;);
+
+13)char constant are ASCII value.
+
+14)if() else if() is valid without last else.
+
+15)In if cond logical OR is there  if(x||y||z) if x||y is true then compiler will  not check other.Similary others.
+
+16)func call(argument) : dunction definition(parameter).
+
+17)Global variable init value is 0.automatic/local variable contains garbage value.
+
+18)Definitin   --> to the place where the variable is created or assigned storage;  
+   Declaration --> to the place where the  nature of the variable is stated but no storag allocated.
+
+      CHAPTER 3
+1)\a,\b,\f,\r,\n,\t,\v
+  \\,\?,\',\",\ooo,\xhh
+  
+2)Implicit convertion :
+ explicit conversion:(type-name) expersion:(int) x;
+ 
+3) ++(expression) or (expression)++ is illigal.Eg:(i+j)++
+
+4)Bitwise oper is applied to integer value.Relational oper is applied to binary.
+
+5)The Scope of the goto label is entire function
+
+      CHAPTER 4
+1) If return does not send any value then it will be garbage value.Eg: a = foo();a->garbage value
+
+2)external == global variable and extern variable is different
+
+3)getch,getchar,ungetch.
+    c = getch();               // console a -> input buffer[] =97 :push()
+    printf( "c=%d\n", c);      // 97
+    ungetch( c );              // pop() -> c value is sent to console(will not be displayed)
+    printf( "c=%d\n", c);      // same 97 value of c
+    c = getch();               // read the value sent back to console by ungetch i,e 97
+    printf( "c=%d\n", c);      // 97
+NOTE:Console input will be stored in buf[]:Cosole<->buf[]<->getch()/ungetch()(In our code)
+
+4)external/global variable definition->type + storage in memory:definition on type of variable
+    int sp;
+    double val[MAXVAL];
+	
+extern only gives definition of a variable i,e type no storage in other file
+	extern int sp;
+    extern double val[];
+
+NOTE:extern int sp; // In a funtion means external variable definied as local variable but has a value of extern variable.(Same as using 
+     a external/global variable inside a function without definiting it.)
+	 
+5)External/global Array sizes must be specified with the definition, but are optional with an extern declaration.
+
+6)The static declaration, applied to an external variable or function, limits the scope of that object to the rest of the source file being
+ compiled.
+ Internal static variables(Inside a function) provide private, permanent storage within a single function.
+ 
+7)A register declaration advises the compiler that the variable in question will be heavily used.The idea is that register variables are to
+ be placed in machine registers.
+ The register declaration can only be applied to automatic variables and to the formal parameters of a function.
+ 
+8)Block Structure:
+  A function cannot be defined inside another function but variables can be defined in a block-structured fashion within a function. 
+  Declarations of variables (including initializations) may follow the left brace that introduces any compound statement, not just the one 
+  that begins a function. Variables declared in this way hide any identically named variablesin outer blocks, and remain in existence until
+  the matching right brace.
+  
+9)Initialisation of external/global  or static variable should be a constant expression.
+  Automatic/local or register variable is not restricted to being a constant: it may be any expression.
+  
+10)If there are fewer initializers for an array than the specified size, the others will be zero for external, static and automatic variables.
+ It is an error to have too many initializers. There is noway to specify repetition of an initializer, nor to initialize an element in the 
+ middle of an array without supplying all the preceding values as well.
+
+11)Recursion may provide no saving in storage, since somewhere a stack of the values being processed must be maintained.
+
+12) C-preprocessor
+ HEADER FILE
+ <stdio.h>, in which getchar and putchar are often defined as macros to avoid the run-time overhead of a function call per character 
+ processed. The functions in <ctype.h> are also usually implemented as macros.
+ MACRO
+ Names may be undefined with #undef, usually to ensure that a routine is really a function, not a macro:
+    #undef getchar
+	int getchar(void) { ... };
+ Normally the replacement text is the rest of the line, but a long definition may be continued onto several lines by placing a \ at the end 
+ of each line to be continued. The scope of a name defined with #define is from its point of definition to the end of the source file being 
+ compiled.
+ CONDITION COMPLIALTION
+ if,elif,else,endif
+ ifdef,ifndef,endif
