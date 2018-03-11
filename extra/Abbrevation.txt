@@ -1,0 +1,8 @@
+                             TV CONNECTIONS
+HDMI ---->>High-Definition Multimedia Interface.
+S/PDIF -->>Sony/Philips Digital Interface Format--is a type of digital audio.
+Y′CbCr -->>is often called YPbPr(analog) when used for analog component video, although the term Y′CbCr is commonly used for both systems, 
+           with or without the prime.
+RCA  ---->>Radio Corporation of America.
+VGA  ---->>Video Graphics Array (15 pin) analog
+S-Video-->>separate video , typically 480i or 576i. By separating the black-and-white and coloring signal.Analog signal.

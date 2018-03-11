@@ -1,0 +1,201 @@
+1) In C, if a function signature doesn’t specify any argument, it means that the function can be called with any number of parameters or without
+ any parameters. Eg:foo()
+ 
+2)The macro arguments are not evaluated before macro expansion. For example consider the following program.
+#define MULTIPLY(a, b) a*b
+The macro is expended as 2 + 3 * 3 + 5, not as 5*8
+
+3)The tokens passed to macros can be concatenated using operator ## called Token-Pasting operator.Eg max(2,3)->2##3 = 23
+ A token passed to macro can be converted to a sting literal by using # before it.Eg:max(2,3)->#23 = "23"
+ 
+4)The macros can be written in multiple lines using ‘\’. The last line doesn’t need to have ‘\’.
+#include <stdio.h>
+#define PRINT(i, limit) while (i < limit) \
+                        { \
+                            printf("GeeksQuiz "); \
+                            i++; \
+                        }
+
+5)If we use inline functions, we get the expected output. Also the program given in point 4 above can be corrected using inline functions.
+
+inline int square(int x) { return x*x; }
+int main()
+{
+  int x = 36/square(6);
+  printf("%d", x);
+  return 0;
+}
+// Output: 1
+  
+
+6)                       Compiling a C program:- Behind the Scenes
+ There are four phases for a C program to become an executable:
+
+  1)Pre-processing  (gcc a.c -E a.i)
+  2)Compilation     (gcc a.i -c a.s)
+  3)Assembly        (gcc a.s -s a.o)
+  4)Linking         (gcc a.o -o a.exe )
+
+ Pre-processing
+  This is the first phase through which source code is passed. This phase include:
+  Removal of Comments
+  Expansion of Macros
+  Conditional complilation
+  Expansion of the included files.
+  
+ Compiling
+  The next step is to compile filename.i and produce an; intermediate compiled output file filename.s. This file is in assembly level 
+  instructions.The snapshot shows that it is in assembly language, which assembler can understand.
+  
+ Assembly
+  In this phase the filename.s is taken as input and turned into filename.o by assembler. This file contain machine level instructions.
+  At this phase, only existing code is converted into machine language, the function calls like printf() are not resolved.
+  
+ Linking
+  This is the final phase in which all the linking of function calls with their definitions are done.output file increases from an object
+  file to an executable file. This is because of the extra code that linker adds with our program.
+  
+7)Line Splicing in C/C++
+   makes new line part of current line.
+   Eg:r = 1 \
+      +2
+	  RESULT r =3
+	  
+	  
+8)Tokens can be classified as follows:
+  Keywords
+  Identifiers
+  Constants
+  Strings
+  Special Symbols . [],(),*,=, ',' , : etc
+  Operators. ++,--,+,-,*,/,%,?: etc
+
+ Keywords:
+   C language supports 32 keywords which are given below:
+     auto         double      int        struct
+     break        else        long       switch
+     case         enum        register   typedef
+     char         extern      return     union
+     const        float       short      unsigned
+     continue     for         signed     void
+     default      goto        sizeof     volatile
+     do           if          static     while
+ Identifiers
+   They must consist of only letters, digits, or underscore. No other special character is allowed.
+   It should be up to 31 characters long as only first 31 characters are significant.
+ Constants
+   data_type variable_name; (or) const data_type *variable_name;
+    Integer,real/floating point,octal,hexadecimal,char,string--constants
+	
+NOTE:
+Is it possible to have separate declaration and definition?
+  It is possible in case of extern variables and functions. See question 1 of this for more details.
+To restrict access to file2 only from file1, global variables can be marked as static.
+
+9)Constants variable
+ const can be used to declare constant variables. Constant variables are variables which when initialized, can’t change their value. Or in other words, the value assigned to them is unmodifiable.
+  Syntax:
+  const data_type var_name = var_value; 
+  Note: Constant variables need to be compulsorily be initialized during their declaration itself. const keyword is also used with pointers.
+ 
+10)How Linkers Resolve Global Symbols Defined at Multiple Places?
+   Functions and initialized global variables get strong symbols. Uninitialized global variables get weak symbols.
+   
+   Given this notion of strong and weak symbols, Unix linkers use the following rules for dealing with multiply defined symbols:
+    Rule 1: Multiple strong symbols are not allowed.                                  (int x =12;//main.c  and int x =8; //in b.c)
+    Rule 2: Given a strong symbol and multiple weak symbols, choose the strong symbol. 
+    Rule 3: Given multiple weak symbols, choose any of the weak symbols.
+	
+11)complicated declarations.
+
+1) Convert C declaration to postfix format and read from left to right.
+2) To convert experssion to postfix, start from innermost parenthesis, If innermost parenthesis is not present then start from declarations
+   name and go right first. When first ending parenthesis encounters then go left. Once whole parenthesis is parsed then come out from parenthesis.
+3) Continue until complete declaration has been parsed.
+Eg:void (*f[10]) (int, int)
+   f is an array of 10 of pointer to function(which takes 2 arguments of type int) returning void.
+   
+12)Redeclaration of global variable
+    C allows a global variable to be declared again when first declaration doesn’t initialize the variable.
+	
+13)Different ways to declare variable as constant in C 
+ Using const keyword: The const keyword specifies that a variable or object value is constant and can’t be modified at the compilation time.
+ Using enum keyword: Enumeration (or enum) is a user defined data type in C. It is mainly used to assign names to integral constants.
+ Using Macros: We can also use Macros to define constant
+ Using constexpr
+ 
+14)Why variable name does not start with numbers in C ?
+The compiler has 7 phase as fellows:
+
+    Lexical Analysis
+    Syntax Analysis
+    Semantic Analysis
+    Intermediate Code Generation
+    Code Optimization
+    Code Generation
+    Symbol Table
+Backtracking is avoided in lexical analysis phase while compiling the piece of code. The variable like Apple; , the compiler will know its a 
+identifier right away when it meets letter ‘A’ character in the lexical Analysis phase. However, a variable like 123apple; , compiler won’t 
+be able to decide if its a number or identifier until it hits ‘a’ and it needs backtracking to go in the lexical analysis phase to identify 
+that it is a variable. But it is not supported in compiler.
+
+NOTE:In C, static and global variables are initialized by the compiler itself. Therefore, they must be initialized with a constant value.
+
+15) DATA TYPE
+Data Type             Memory (bytes)          Range                      Format Specifier
+short int                   2          -32,768 to 32,767                       %hd
+unsigned short int          2           0 to 65,535                            %hu
+unsigned int                4           0 to 4,294,967,295                     %u
+int                         4          -2,147,483,648 to 2,147,483,647         %d
+long int                    4          -2,147,483,648 to 2,147,483,647         %ld
+unsigned long int           4           0 to 4,294,967,295                     %lu
+long long int               8          -(2^63) to (2^63)-1                     %lld
+unsigned long long int      8           0 to 18,446,744,073,709,551,615        %llu
+signed char                 1          -128 to 127                             %c 
+unsigned char               1           0 to 255                               %c
+float                       4                                                  %f
+double                      8                                                  %lf
+long double                 12                                                 %Lf
+
+NOTE:A header file “stdbool.h” must be included to use bool in C
+
+NOTE:if (x == 0.1)
+        printf("IF");
+    else if (x == 0.1f)
+        printf("ELSE IF"); //correct because 0.1(10) in binary is too big no.
+		
+	if (x == 0.5)
+        printf("IF");      //correct 0.5(10) is 0.1(2)
+    else if (x == 0.5f)
+        printf("ELSE IF");
+		
+NOTE:There’s an extern present in the beginning which is hidden and the compiler treats it as below.
+    int foo(int arg1, char arg2);< == >extern int foo(int arg1, char arg2);
+
+16)Memory layout 
+        _______________________
+       |COMMAND LINE ARGUMENTS |
+	   |main(int argno,char *  |
+	   |_______________________|
+	   | STACKS(Local var,fun) |
+	   |_________|_____________|
+	   |         V             |
+	   |_______________________|     
+	   |                       |
+	   |_________^_____________|
+	   |         |             |
+	   |        HEAPS          |
+	   | dynamic mem allocation|
+	   | malloc,calloc,realloc |
+	   |_______________________|
+	   |         |             |
+	   |         |    Init     |
+	   | DATA    |_____________|
+	   | Global=0|             |
+	   | Static=0|   UNINIT    |
+	   |_________|_____________|
+	   |      READ ONLY        |
+	   |_______________________|     
+	   |     TEXT(a.exe)       |
+	   |_______________________|
+	  
