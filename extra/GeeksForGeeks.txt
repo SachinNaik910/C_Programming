@@ -46,13 +46,20 @@ int main()
  Compiling
   The next step is to compile filename.i and produce an; intermediate compiled output file filename.s. This file is in assembly level 
   instructions.The snapshot shows that it is in assembly language, which assembler can understand.
+    Lexical Analysis             (collects keywords and checks spellings)
+    Syntax Analysis              (checks syntax mistakes)
+    Semantic Analysis            (Proides meaning to every c statements)
+    Intermediate Code Generation ()
+    Code Optimization            (Reduce code size.Eg:x*x*x =x^3)
+    Code Generation              (Machine level code is generated)
+    Symbol Table                  
   
  Assembly
   In this phase the filename.s is taken as input and turned into filename.o by assembler. This file contain machine level instructions.
   At this phase, only existing code is converted into machine language, the function calls like printf() are not resolved.
   
  Linking
-  This is the final phase in which all the linking of function calls with their definitions are done.output file increases from an object
+  Here the functions from std library and current directory is linked with main func. This is the final phase in which all the linking of function calls with their definitions are done.output file increases from an object
   file to an executable file. This is because of the extra code that linker adds with our program.
   
 7)Line Splicing in C/C++
@@ -193,9 +200,180 @@ NOTE:There’s an extern present in the beginning which is hidden and the compil
 	   | DATA    |_____________|
 	   | Global=0|             |
 	   | Static=0|   UNINIT    |
-	   |_________|_____________|
-	   |      READ ONLY        |
-	   |_______________________|     
+	   |local St-|_____________|
+	   |   atic  | READ ONLY   |
+	   |_________|_____________|     
 	   |     TEXT(a.exe)       |
 	   |_______________________|
 	  
+17)If you declare a global variable and initialize it as 0 or NULL then still it would go to uninitialized data segment or bss.
+
+
+                        POINTERS
+1)Dangling pointer:A pointer pointing to a memory location that has been deleted (or freed) is called dangling pointer. 
+  Three ways it gets created:
+   ->De-allocation of memory
+	    free(ptr); 
+   ->Function Call
+        int *p = fun();
+        fflush(stdin);
+   ->Variable goes out of scope
+        void main(){
+          int *ptr;
+          {
+            int ch;
+            ptr = &ch;
+          } 
+        }
+		
+2)void pointer:Any pointer type is convertible to a void pointer hence it can point to any value.void pointers cannot be dereferenced. 
+  It can however be done using typecasting the void pointer
+  void *ptr;
+  (int*)ptr     //does type casting of void 
+  *((int*)ptr)  //dereferences the typecasted
+  
+3)NULL Pointer:NULL Pointer is a pointer which is pointing to nothing. In case, if we don’t have address to be assigned to a pointer, 
+then we can simply use NULL.
+
+4)Wild pointer:A pointer which has not been initialized to anything (not even NULL) is known as wild pointer. The pointer may be initialized 
+to a non-NULL garbage value that may not be a valid address.
+   int *p;  /* wild pointer */
+   int x = 10;
+   // p is not a wild pointer now
+   p = &x;
+   
+NOTE:
+->arr[0] with 0[arr], the output would be same. Because compiler converts the array operation in pointers before accessing the array elements.
+  e.g. arr[0] would be *(arr + 0) and therefore 0[arr] would be *(0 + arr) 
+->a string literal initialization of a character array
+    char array[] = “abc” sets the first four elements in array to ‘a’, ‘b’, ‘c’, and ‘\0’
+    char *pointer = “abc” sets pointer to the address of the “abc” string (which may be stored in read-only memory and thus unchangeable)
+ 
+5)Near pointer is used to store 16 bit addresses means within current segment on a 16 bit machine. The limitation is that we can only 
+  access 64kb of data at a time.
+  A far pointer is typically 32 bit that can access memory outside current segment.  To use this, compiler allocates a segment register 
+  to store segment address, then another register to store offset within current segment.
+  Like far pointer, huge pointer is also typically 32 bit and can access outside segment. In case of far pointers, a segment is fixed. 
+  In far pointer, the segment part cannot be modified, but in Huge it can be
+  
+6)Restrict Keyword:
+   Note that the purpose of restrict is to show only syntax. It doesn't change anything in output (or logic). It is just a way for
+   programmer to tell compiler about an optimization.
+      void use(int* a, int* b, int* restrict c){}
+	  use(&a, &b, &c);
+	  
+NOTE:
+ type arr[];
+ Address addr and &addr is same.
+ 
+7)ptr is pointer that can point to an array of 5 integers.
+  int (*ptr)[5]; 
+  int arr[5];
+  p = arr;
+  ptr = &arr; 
+  printf("p = %p, ptr = %p\n", p, ptr);
+  p++; 
+  ptr++;
+  printf("p = %p, ptr = %p\n", p, ptr);
+  return 0;
+}
+
+p = 0x7fff4f32fd50, ptr = 0x7fff4f32fd50
+p = 0x7fff4f32fd54, ptr = 0x7fff4f32fd64
+
+NOTE:ptr(&*ptr) == *ptr = address
+     **ptr = value to pointing to
+
+Two-Dimension array:
+a[][]={{1,2,3},{4,5,6}}
+a[i][j] = *(*(ptr+i)+j)
+  ptr contains starting address of a here of 1,but its size is 1-D array so i=1 in address will increment by 1-D array size here it point to 4.
+  *(ptr+i) will give address and j=1 will increment inside 1-D array here it points to 5.
+
+8)Function Pointer
+void fun(int a){
+    printf("Value of a is %d\n", a);
+}
+int main(){ 
+    void (*fun_ptr)(int) = fun;  // & removed
+    (*fun_ptr)(10);  // * //if we remove * no change, i,e fun_ptr(10)
+    return 0;
+}
+  
+Function Array Of Pointer
+void (*fun_ptr_arr[])(int, int) = {add, subtract, multiply};
+(*fun_ptr_arr[ch])(a, b); //if we remove * no change
+
+Function as arguments
+wrapper(fun1);
+void wrapper(void (*fun)());  //if we remove * no change  
+   fun();
+   
+Function with any data type
+bool compare (const void * a, const void * b);
+int search(void *arr, int arr_size, int ele_size, void *x, bool compare (const void * , const void *));
+search(arr, n,sizeof(int), &x, compare)
+
+Pass parameters
+Pass by Value: In this parameter passing method, values of actual parameters are copied to function’s formal parameters and the two types 
+of parameters are stored in different memory locations. So any changes made inside functions are not reflected in actual parameters of 
+caller.
+Pass by Reference Both actual and formal parameters refer to same locations, so any changes made inside the function are actually reflected 
+in actual parameters of caller.
+
+Following are some important points about functions in C.
+1)Every C program has a function called main() that is called by operating system when a user runs the program.
+
+2)Every function has a return type. If a function doesn’t return any value, then void is used as return type.
+
+3)In C, functions can return any type except arrays and functions. We can get around this limitation by returning pointer to array or 
+  pointer to function.
+  
+  
+FUNCTIONS 
+8)What happens when a function is called before its declaration in C?
+  There is this misconception that the compiler assumes input parameters also int. Had compiler assumed input parameters int, the above program 
+  would have failed in compilation.
+  
+NOTE:_Noreturn function specifier in C i,e _Noreturn func().
+
+9)exit() and _Exit()
+ exit() function performs some cleaning before termination of the program like connection termination, buffer flushes etc. The _Exit() function 
+ in C/C++ gives normal termination of a program without performing any cleanup tasks.
+ 
+10)__func__ , __LINE__ , ____FILE__
+ The identifier __func__ shall be implicitly declared by the translator as if, immediately following the opening brace of each function 
+ definition, the declaration
+    static const char __func__[] = “function-name”;
+	
+11)Callback function
+ In simple language, If a reference of a function is passed to another function as an argument to call it, then it it will be called as a
+ Callback function.
+ In C, a callback function is a function that is called through a function pointer.
+ 
+12)Nesting of function
+  An extension of the GNU C Compiler allows the declarations of nested functions. The declarations of nested functions under GCC’s extension 
+  need to be prefix/start with the auto keyword.
+
+// C program of nested function
+// with the help of gcc extension
+#include <stdio.h>
+int main(void)
+{
+    auto int view(); // declare function with auto keyword
+    view(); // calling function
+    printf("Main\n");
+ 
+    int view()
+    {
+        printf("View\n");
+        return 1;
+    }
+ 
+    printf("GEEKS");
+    return 0;
+}
+
+13)This is because 52 (i.e. 25) might be stored as 24.9999999 or 25.0000000001 because the return type is double. When assigned to int,
+ 25.0000000001 becomes 25 but 24.9999999 will give output 24.
+To overcome this and output the accurate answer in integer format, we can add 0.5 to the result and typecast it to int e.g (int)(pow(5, 2)+0.5) will give the correct answer(25, in above example), irrespective of the compiler.

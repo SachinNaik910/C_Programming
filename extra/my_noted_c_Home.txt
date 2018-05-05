@@ -3,6 +3,7 @@ stdio.h
 stdlib.h
 ctype.h     ->getch,getchar,ungetch()
 string.h 
+stddef.h      sizeof
 
         SORTING
 Binary sorting
@@ -129,3 +130,167 @@ NOTE:extern int sp; // In a funtion means external variable definied as local va
  CONDITION COMPLIALTION
  if,elif,else,endif
  ifdef,ifndef,endif
+ 
+     CHAPTER-5
+1)The unary operator & gives the address of an object, so the statement
+  p = &c;
+  assigns the address of c to the variable p, and p is said to ``point to'' c. The & operator only
+  applies to objects in memory: variables and array elements. It cannot be applied to expressions,
+  constants, or register variables.
+  
+2)pa = &a[0];
+  pa and a have identical values
+  pa is a pointer, expressions might use it with a subscript; pa[i] is identical to *(pa+i).
+  In short, an array-and-index expression is equivalent to one written as a pointer and offset.
+ 
+NOTE:There is one difference between an array name and a pointer that must be kept in mind. A
+     pointer is a variable, so pa=a and pa++ are legal. But an array name is not a variable;
+     constructions like a=pa and a++ are illegal.
+	 
+	 Pointer and Array
+3)char s[]; and char *s; are equivalent;
+
+4)f(&a[2]) and f(a+2)
+  both pass to the function f the address of the subarray that starts at a[2]. Within f, the parameter declaration can read
+  f(int arr[]) { ... } or f(int *arr) { ... }
+  
+5)The first, alloc(n), returns a
+  pointer to n consecutive character positions, which can be used by the caller of alloc forstoring characters. The second, afree(p),
+  releases the storage thus acquired so it can be reused later. The routines are ``rudimentary'' because the calls to afree must be 
+  made in the opposite order to the calls made on alloc. That is, the storage managed by alloc and afree is a stack, or last-in, 
+  first-out. The standard library provides analogous functions called malloc and free that have no such restrictions;
+  alloc hand out pieces of a large character array that we will call allocbuf.
+  
+  The other information needed is how much of allocbuf has been used. We use a pointer, called allocp, that points to the next free 
+  element. When alloc is asked for n characters, it checks to see if there is enough room left in allocbuf. If so, alloc returns the
+  current value of allocp (i.e., the beginning of the free block), then increments it by n to point to the next free area. If there 
+  is no room, alloc returns zero. afree(p) merely sets allocp to p if p is inside allocbuf.
+  
+  #define ALLOCSIZE 10000 /* size of available space */
+  static char allocbuf[ALLOCSIZE]; /* storage for alloc */
+  static char *allocp = allocbuf; /* next free position */
+  char *alloc(int n) /* return pointer to n characters */
+  {
+     if (allocbuf + ALLOCSIZE - allocp >= n) { //checks n space is left or not 
+         allocp += n;                          //increment pointer to point to next free space of type static
+         return allocp - n;                    //send the programmer the current free block pointer
+     } else /* not enough room */
+         return 0;
+  }
+  void afree(char *p) /* free storage pointed to by p */
+  {
+     if (p >= allocbuf && p < allocbuf + ALLOCSIZE)    //checks if given pointer is in valid location and range and bring back allocp..
+         allocp = p;                                   //to point to freed location
+  }
+  
+  
+  If p and q point to members of the same array, then relations like ==, !=, <, >=, etc., work properly. For example,
+     p < q 
+  is true if p points to an earlier element of the array than q does. Any pointer can be
+  meaningfully compared for equality or inequality with zero. But the behavior is undefined for
+  arithmetic or comparisons with pointers that do not point to members of the same array.
+  (There is one exception: the address of the first element past the end of an array can be used in
+  pointer arithmetic.)
+  
+NOTE:int *p;p = p+1 ->address increments by 4;char *pa ->by one;
+
+  The valid pointer operations are assignment of pointers of the same type, adding or subtractinga pointer and an integer, subtracting 
+  or comparing two pointers to members of the same array, and assigning or comparing to zero. All other pointer arithmetic is illegal. 
+  It is not legal to add two pointers, or to multiply or divide or shift or mask them, or to add float or double to them, or even, except
+  for void *, to assign a pointer of one type to a pointer of another type without a cast.
+  
+6)foo("noble");
+  char foo(char *s);  => *s->n 
+
+7)char *lineptr[MAXLINES]
+  says that lineptr is an array of MAXLINES elements, each element of which is a pointer to a char.
+  
+8)f(int daytab[][13]) { ... } == f(int (*daytab)[13]) { ... }
+    which says that the parameter is a pointer to an array of 13 integers. The parentheses are necessary since brackets [] have higher 
+    precedence than *. Without parentheses, the declaration.
+  int *daytab[13],
+    is an array of 13 pointers to integers. More generally, only the first dimension (subscript) of an array is free; all the others 
+    have to be specified
+	
+9)int a[10][20];
+  int *b[10]; then a[3][4] and b[3][4] are both syntactically legal references to a single int. But a is a true two-dimensional array: 
+  200 int-sized locations have been set aside, and the conventional rectangular subscript calculation 20 * row +col is used to find the
+  element a[row,col]. For b, however, the definition only allocates 10 pointers and does not initialize them; initialization must be done 
+  explicitly, either statically or with code.
+  
+10)Command Line Argument
+   The first optional argument is argv[1] and the last is argv[argc-1];
+   additionally, the standard requires that argv[argc] be a null pointer.
+
+   
+   POINTERS
+1)The parentheses are necessary in (*pp).x because the precedence of the structure member
+  operator . is higher then *. The expression *pp.x means *(pp.x), which is illegal here
+  because x is not a pointer.
+
+2)++p->len
+  increments len, not p, because the implied parenthesization is ++(p->len). Parentheses can be
+  used to alter binding: (++p)->len increments p before accessing len, and (p++)->len
+  increments p afterward. (This last set of parentheses is unnecessary.)
+  In the same way, *p->str fetches whatever str points to; *p->str++ increments str after
+  accessing whatever it points to (just like *s++); (*p->str)++ increments whatever str points
+  to; and *p++->str increments p after accessing whatever str points to.
+
+                      
+					  
+					 CHAPTER-6
+					 Structure
+NOTE:
+A sizeof can not be used in a #if line, because the preprocessor does not parse type names.
+But the expression in the #define is not evaluated by the preprocessor, so the code here is
+legal.
+
+1)Array of structure initialization
+ struct key {
+char *word;
+int count;
+} keytab[] = {
+"auto", 0,
+"break", 0,
+"case", 0,
+"char", 0,
+"const", 0,
+"continue", 0,
+"default", 0,
+/* ... */
+"unsigned", 0,
+"void", 0,
+"volatile", 0,
+"while", 0
+};
+
+2)struct key keytab[];
+func call:binsearch(word, keytab, NKEYS)
+func:int binsearch(char *, struct key *, int); or
+func:int binsearch(char *word, struct key tab[], int n)
+
+NOTE:
+&tab[-1] and &tab[n] are both outside the limits of the array tab. The former is strictly illegal, and it is illegal to dereference the latter.
+
+3)for (p = keytab; p < keytab + NKEYS; p++)
+If p is a pointer to a structure, arithmetic on p takes into account the size of the structure, so
+p++ increments p by the correct amount to get the next element of the array of structures, and
+the test stops the loop at the right time.
+
+NOTE:
+     struct {
+       char c;
+       int i;
+     };
+ might well require eight bytes, not five. The sizeof operator returns the proper value.
+ 
+4)Self Referential structure
+  struct tnode { /* the tree node: */
+		char *word; /* points to the text */
+		int count; /* number of occurrences */
+		struct tnode *left; /* left child */
+		struct tnode *right; /* right child */
+  };
+It is illegal for a structure to contain an instance of itself(non-pointers), but 
+  struct tnode *left;
+declares left to be a pointer to a tnode, not a tnode itself.

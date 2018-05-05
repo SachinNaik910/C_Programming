@@ -1,5 +1,5 @@
 #include <stdio.h>
-//#include "calci.h"
+#include "calci.h"
 
 main()
 {
@@ -7,11 +7,11 @@ main()
 	char ch;
 	printf("Enter two no for\n");
 	scanf("%f %f",&a, &b);
+	printf("Entered value is %f and %f\n", a, b);
 	
 	printf("Which operation would you like to be performed on above no:\n");
 	printf("1:ADDTION\n2:SUBTRACTION\n3:MULTIPLICATION\n4:DIVISION\n");
 	scanf(" %c", &ch);
-	printf("%d\n",ch);
 	
 	switch(ch){
 		case '1':
