@@ -182,12 +182,12 @@ NOTE:There’s an extern present in the beginning which is hidden and the compil
 16)Memory layout 
         _______________________
        |COMMAND LINE ARGUMENTS |
-	   |main(int argno,char *  |
+	   |main(int argno,char **)|
 	   |_______________________|
 	   | STACKS(Local var,fun) |
 	   |_________|_____________|
 	   |         V             |
-	   |_______________________|     
+	   |_ _ _ _ _ _ _ _ _ _ _ _|     
 	   |                       |
 	   |_________^_____________|
 	   |         |             |
@@ -195,14 +195,14 @@ NOTE:There’s an extern present in the beginning which is hidden and the compil
 	   | dynamic mem allocation|
 	   | malloc,calloc,realloc |
 	   |_______________________|
-	   |         |             |
-	   |         |    Init     |
-	   | DATA    |_____________|
-	   | Global=0|             |
-	   | Static=0|   UNINIT    |
-	   |local St-|_____________|
-	   |   atic  | READ ONLY   |
-	   |_________|_____________|     
+	   |  DATA   |    Init     |
+	   | Global=0|_____________|
+	   | Static=0|             |
+	   |local St-|   UNINIT    |
+	   |  atic   |             |
+	   |_________|_____________|
+	   |  READ ONLY(constant)  |
+	   |_______________________|     
 	   |     TEXT(a.exe)       |
 	   |_______________________|
 	  
@@ -376,4 +376,690 @@ int main(void)
 
 13)This is because 52 (i.e. 25) might be stored as 24.9999999 or 25.0000000001 because the return type is double. When assigned to int,
  25.0000000001 becomes 25 but 24.9999999 will give output 24.
-To overcome this and output the accurate answer in integer format, we can add 0.5 to the result and typecast it to int e.g (int)(pow(5, 2)+0.5) will give the correct answer(25, in above example), irrespective of the compiler.
+To overcome this and output the accurate answer in integer format, we can add 0.5 to the result and typecast it to int 
+  e.g (int)(pow(5, 2)+0.5) will give the correct answer(25, in above example), irrespective of the compiler.
+
+
+                           DATA TYPE
+List of ranges along with the memory requirement and format specifiers on 32 bit gcc compiler.
+
+Data Type             Memory (bytes)          Range                      Format Specifier
+short int                   2          -32,768 to 32,767                       %hd
+unsigned short int          2           0 to 65,535                            %hu
+unsigned int                4           0 to 4,294,967,295                     %u
+int                         4          -2,147,483,648 to 2,147,483,647         %d
+long int                    4          -2,147,483,648 to 2,147,483,647         %ld
+unsigned long int           4           0 to 4,294,967,295                     %lu
+long long int               8          -(2^63) to (2^63)-1                     %lld
+unsigned long long int      8           0 to 18,446,744,073,709,551,615        %llu
+signed char                 1          -128 to 127                             %c 
+unsigned char               1           0 to 255                               %c
+float                       4                                                  %f
+double                      8                                                  %lf
+long double                 12                                                 %Lf						   
+
+
+                          STORAGE CLASS
+auto: assigned a garbage value by default whenever they are declared.
+extern: Also, a normal global variable can be made extern as well by placing the ‘extern’ keyword before its declaration/definition in any 
+        function/block.The main purpose of using extern variables is that they can be accessed between two different files which are part 
+		of a large program.						  						 
+
+NOTE: By default, the declaration and definition of a C function have “extern” prepended with them. It means even though we don’t use extern
+      with the declaration/definition of C functions, it is present there.
+	  1. Declaration can be done any number of times but definition only once.
+      2. “extern” keyword is used to extend the visibility of variables/functions().
+      3. Since functions are visible through out the program by default. The use of extern is not needed in function declaration/definition. 
+	     Its use is redundant.
+      4. When extern is used with a variable, it’s only declared not defined.
+      5. As an exception, when an extern variable is declared with initialization, it is taken as definition of the variable as well.
+	  
+register: This storage class declares register variables which have the same functionality as that of the auto variables. The only difference
+         is that the compiler tries to store these variables in the register of the microprocessor if a free register is available. If a free 
+		 register is not available, these are then stored in the memory only. we cannot obtain the address of a register variable using pointers.
+		 
+Volatile
+Global variables modified by an interrupt service routine outside the scope: Failing to declare variable as volatile, the compiler will 
+optimize the code in such a way that it will read the port only once and keeps using the same value in a temporary register to speed up the 
+program (speed optimization). 		 
+
+Global variables within a multi-threaded application:Since threads run asynchronously, any update of global variable due to one thread should
+ be fetched freshly by another consumer thread. Compiler can read the global variable and can place them in temporary variable of current thread context. To nullify the effect of compiler optimizations, such global variables to be qualified as volatile
+
+If we do not use volatile qualifier, the following problems may arise
+1) Code may not work as expected when optimization is turned on.
+2) Code may not work as expected when interrupts are enabled and used.
+
+Const Qualifier in C
+1) Pointer to variable.
+int *ptr;
+We can change the value of ptr and we can also change the value of object ptr pointing to. Pointer and value pointed by pointer both are stored
+in read-write area. See the following code fragment.
+
+2) Pointer to constant.
+const int *ptr;
+int const *ptr;
+We can change pointer to point to any other integer variable, but cannot change value of object (entity) pointed using pointer ptr. Pointer is
+stored in read-write area (stack in present case). Object pointed may be in read only or read write area. 
+
+3) Constant pointer to variable.
+int *const ptr;
+Above declaration is constant pointer to integer variable, means we can change value of object pointed by pointer, but cannot change the pointer
+to point another variable.
+
+4) constant pointer to constant
+const int *const ptr;
+Above declaration is constant pointer to constant variable which means we cannot change value pointed by pointer as well as we cannot point the
+pointer to other variable. Let us see with example.
+
+NOTE:
+Initialization of static variables in C
+In C, static variables can only be initialized using constant literals. For example, following program fails in compilation.
+The reason for this is simple: All objects with static storage duration must be initialized (set to their initial values) before execution of 
+main() starts. So a value which is not known at translation time cannot be used for initialization of static variables.
+
+NOTE:
+register keyword can be used with pointer variables. Obviously, a register can have address of a memory location. 
+Register is a storage class, and C doesn’t allow multiple storage class specifiers for a variable. So, register can not be used with static 
+
+NOTE:
+In C, static variables can only be initialized using constant literals. For example, following program fails in compilation. See this for
+more details.Static global variables and functions are also possible in C/C++. The purpose of these is to limit scope of a variable or function to a file.
+Macro  the expression “a##b” prints concatenation of ‘a’ and ‘b'.
+ a header file “stdbool.h” must be included to use bool in (true, false)
+If compiler is 32 bit then it is nothing other than typedef(i.e., alias) for unsigned int but if compiler is 64 bit then it would be a 
+typedef for unsigned long long. In short size_t is never negative.Therefore many library function of C language declare their argument and 
+return type as size_t like malloc, memcpy and strength. - 1 values creates problems in loop. If no data type is given to a variable, then
+the compiler automatically converted it to int data type.
+Signed is the default modifier for char and int data types.
+We can’t use any modifiers in float data type. If programmer try to use it then compiler automatically give compile time error.Only long is allowed. 
+float is a 32 bit IEEE 754 single precision Floating Point Number1 bit for the sign, (8 bits for the exponent, and 23* for the value), i.e. float has 7 decimal digits of precision.
+
+double is a 64 bit IEEE 754 double precision Floating Point Number (1 bit for the sign, 11 bits for the exponent, and 52* bits for the value), i.e. double has 15 decimal digits of precision.
+Implicit conversion 
+bool -> char -> short int -> int -> unsigned int -> long -> unsigned -> long long -> float -> double ->..... Type conversion promotion 
+Explicit conversion 
+(type) expression
+
+
+             CONTROL STATEMENT
+In C switch statement, the expression of each case label must be an integer constant only(integer constant expression will work).			 
+
+SWITCH
+1) The expression used in switch must be integral type ( int, char and enum). Any other type of expression is not allowed.
+2)The default block can be placed anywhere. The position of default doesn’t matter, it is still executed if no match found.
+3)The integral expressions used in labels must be a constant expressions
+NOTE:
+You can specify a range of consecutive values in a single case label, like this:
+case low ... high:
+Eg:// Correct  -   case 1 ... 5:
+   // Wrong -    case 1...5:
+   
+           MEMORY MANAGEMENT
+Uninitialized Data Segment:
+Uninitialized data segment, often called the “bss” segment, named after an ancient assembler operator that stood for 
+“block started by symbol.” Data in this segment is initialized by the kernel to arithmetic 0 before the program starts executing		   
+
+STACKS
+A “stack pointer” register tracks the top of the stack; it is adjusted each time a value is “pushed” onto the stack. The set of values pushed 
+for one function call is termed a “stack frame”; A stack frame consists at minimum of a return address.Each time a function is called, the 
+address of where to return to and certain information about the caller’s environment, such as some of the machine registers, are saved on the
+stack. The newly called function then allocates room on the stack for its automatic and temporary variables. 
+
+HEAPS
+The Heap area is shared by all shared libraries and dynamically loaded modules in a process.
+
+NOTE:
+Dynamcally Loading 
+It is one of the 3 mechanisms by which a computer program can use some other software; the other two are static linking and dynamic linking. 
+Unlike static linking and dynamic linking, dynamic loading allows a computer program to start up in the absence of these libraries, to 
+discover available libraries, and to potentially gain additional functionality
+
+NOTE:
+SIZE command
+[narendra@CentOS]$ size memory-layout
+text       data        bss        dec        hex    filename
+ 960        248         12       1220        4c4    memory-layout
+ 
+NOTE:There are two types of qualifiers available in C language. They are,
+const
+volatile
+
+GOTO:
+The goto statement can be used to jump from anywhere to anywhere within a function.
+Use of goto can be simply avoided using break and continue statements.
+
+Realloc
+void* realloc (void* ptr, size_t size);
+ ptr
+Pointer to a memory block previously allocated with malloc, calloc or realloc.Alternatively, this can be a null pointer, in which case a new block is allocated (as if malloc was called).
+ size
+New size for the memory block, in bytes. size_t is an unsigned integral type.
+
+Note:
+If “size” is zero, then call to realloc is equivalent to “free(ptr)”. And if “ptr” is NULL and size is 
+non-zero then call to realloc is equivalent to “malloc(size)”.
+
+Malloc & Calloc
+void * malloc( size_t size );
+void * calloc( size_t num, size_t size );
+Eg:
+  // malloc() allocate the memory for 5 integers
+   // containing garbage values
+   arr = (int *)malloc(5 * sizeof(int)); // 5*4bytes = 5 bytes
+   
+   // calloc() allocate the memory for 5 integers and
+   // set 0 to all of them
+   arr = (int *)calloc(5, sizeof(int));
+ 
+NOTE:
+We can achieve same functionality as calloc() by using malloc() followed by memset().
+ptr = malloc(size);
+memset(ptr, 0, size);
+
+FREE
+void free(void *ptr);
+Note that the free function does not accept size as a parameter. How does free() function know how much memory to free given just a pointer?
+When memory allocation is done, the actual heap space allocated is one word larger than the requested memory. The extra word is used to store
+the size of the allocation and is later used by free( ).
+
+
+                                       Enum, Struct and Union:
+What is designated Initialization?
+Designated Initialization allows structure members to be initialized in any order. This feature has been added in C99 standard.
+
+  What are applications of union?
+Unions can be useful in many situations where we want to use same memory for two ore more members. For example, suppose we want to implement a binary tree data structure where each leaf node has a double data value, while each internal node has pointers to two children, but no data. If we declare this as:
+
+struct NODE {
+  struct NODE *left;
+  struct NODE *right;
+  double data;
+};
+Run on IDE
+then every node requires 16 bytes, with half the bytes wasted for each type of node. On the other hand, if we declare a node as following, then we can save space.
+
+struct NODE
+{
+    bool is_leaf;
+    union
+    {
+        struct
+        {
+            struct NODE *left;
+            struct NODE *right;
+        } internal;
+        double data;
+    } info;
+};
+
+Struct Hack
+What will be the size of following structure?
+
+struct employee
+{
+    int     emp_id;
+    int     name_len;
+    char    name[0];
+};
+Run on IDE
+4 + 4 + 0 = 8 bytes.
+And what about size of “name[0]”. In gcc, when we create an array of zero length, it is considered as array of incomplete type that’s why 
+gcc reports its size as “0” bytes. This technique is known as “Stuct Hack”. When we create array of zero length inside structure, it must be (and only) last member of structure
+struct employee *e = malloc(sizeof(*e) + sizeof(char) * 128); 
+is equivalent to
+
+struct employee
+{
+    int     emp_id;
+    int     name_len;
+    char    name[128]; /* character array of size 128 */
+};
+
+NOTE:
+In C, the only operation that can be applied to struct variables is assignment. Any other operation (e.g. equality check) is not allowed on 
+struct variables.(structure not elements).
+
+BIT-FIELD:
+date’ takes 12 bytes on a compiler where an unsigned int takes 4 bytes. Since we know that the value of d is always from 1 to 31, value of 
+m is from 1 to 12, we can optimize the space using bit fields.
+#include <stdio.h> 
+// A space optimized representation of date
+struct date
+{
+   // d has value between 1 and 31, so 5 bits
+   // are sufficient
+   unsigned int d: 5;
+ 
+   // m has value between 1 and 12, so 4 bits
+   // are sufficient
+   unsigned int m: 4;
+ 
+   unsigned int y;
+};
+ 
+int main()
+{
+   printf("Size of date is %d bytes\n", sizeof(struct date));
+   struct date dt = {31, 12, 2014};
+   printf("Date is %d/%d/%d", dt.d, dt.m, dt.y);
+   return 0;
+}
+
+1)A special unnamed bit field of size 0 is used to force alignment on next boundary. 
+struct test2
+{
+   unsigned int x: 5;
+   unsigned int: 0;
+   unsigned int y: 8;
+};
+SIZE=8 byte.
+2) We cannot have pointers to bit field members as they may not start at a byte boundary.
+3) It is implementation defined to assign an out-of-range value to a bit field member.
+4) In C, we can have static members in a structure/class, but bit fields cannot be static.
+5) Array of bit fields is not allowed. For example, the below program fails in compilation.
+
+
+Flexible Array Members in a structure in C
+ Flexible Array Member(FAM) is a feature introduced in the C99 standard of the C programming language.
+ For the structures in C programming language from C99 standard onwards, we can declare an array without a dimension and whose size is flexible in nature.
+ Such an array inside the structure should preferably be declared as the last member of structure and its size is variable(can be changed be at runtime).
+ The structure must contain at least one more named member in addition to the flexible array member.
+ What must be the size of the structure below?
+
+struct student
+{
+   int stud_id;
+   int name_len;
+   int struct_size;
+   char stud_name[];
+};
+ The size of structure is = 4 + 4 + 4 + 0 = 12
+ In the above code snippet, the size i.e length of array “stud_name” isn’t fixed and is an FAM.
+ The memory allocation using flexible array members(as per C99 standards) for the above example can be done as:
+ struct student *s = malloc( sizeof(*s) + sizeof(char [strlen(stud_name)])  );  
+ 
+Similarities between Structure and Union  
+ Both are user-defined data types used to store data of different types as a single unit.
+ Their members can be objects of any type, including other structures and unions or arrays. A member can also consist of a bit field.
+ Both structures and unions support only assignment = and sizeof operators. The two structures or unions in the assignment must have the same members and member types.
+ A structure or a union can be passed by value to functions and returned by value by functions. The argument must have the same type as the function parameter. A structure or union is passed by value just like a scalar variable as a corresponding parameter.
+ ‘.’ operator is used for accessing members.
+
+ Differenceshttp://cdncontribute.geeksforgeeks.org/wp-content/uploads/Structure-vs-Union.png
+ 
+Anonymous Union and Structure in C
+ Anonymous unions/structures are also known as unnamed unions/structures as they don’t have names. Since there is no names, direct objects
+ (or variables) of them are not created and we use them in nested structure or unions.
+
+Compound Literals
+ Compound literals are mainly used with structures and are particularly useful when passing structures variables to functions. We can pass a structure object without defining it
+ For example, consider the below code.
+
+ // Please make sure that you compile this program
+ // using a C compiler, not a C++ compiler (Save your
+ // file .cpp). If using online compiler, select "C"
+ #include <stdio.h>
+ struct Point
+ {
+    int x, y;
+ };
+ 
+void printPoint(struct Point p)
+{
+   printf("%d, %d", p.x, p.y);
+}
+ 
+int main()
+{
+   // Calling printPoint() without creating any temporary
+   // Point variable in main()
+   printPoint((struct Point){2, 3});
+ 
+   /*  Without compound literal, above statement would have been written as
+       struct Point temp = {2, 3};
+       printPoint(temp);  */
+   return 0;
+}
+
+
+                                Preprocessor
+1)Stringizing Operator 
+  # directive converts its argument in a string.
+Eg:#define PRINT(x) (#x)
+   int main()
+  { 
+     printf("%s",PRINT(x));
+     return 0;
+  }
+  
+2)Variable length arguments for Macros
+Like functions, we can also pass variable length arguments to macros. For this we will use the following preprocessor identifiers.
+
+To support variable length arguments in macro, we must include ellipses (…) in macro definition. There is also “__VA_ARGS__” preprocessing identifier which takes care of variable length argument substitutions which are provided to macro. Concatenation operator ## (aka paste operator) is used to concatenate variable arguments.
+
+Let us see with example. Below macro takes variable length argument like “printf()” function. This macro is for error logging. The macro 
+prints filename followed by line number, and finally it prints info/error message. First arguments “prio” determines the priority of message, i.e. whether it is information message or error, “stream” may be “standard output” or “standard error”. It displays INFO messages on stdout and ERROR messages on stderr stream.
+
+#include <stdio.h>
+
+#define INFO    1
+#define ERR 2
+#define STD_OUT stdout
+#define STD_ERR stderr 
+#define LOG_MESSAGE(prio, stream, msg, ...) do {\
+                        char *str;\
+                        if (prio == INFO)\
+                            str = "INFO";\
+                        else if (prio == ERR)\
+                            str = "ERR";\
+                        fprintf(stream, "[%s] : %s : %d : "msg" \n", \
+                                str, __FILE__, __LINE__, ##__VA_ARGS__);\
+                    } while (0)
+ 
+int main(void)
+{
+    char *s = "Hello";
+        /* display normal message */
+    LOG_MESSAGE(ERR, STD_ERR, "Failed to open file");
+    /* provide string as argument */
+    LOG_MESSAGE(INFO, STD_OUT, "%s Geeks for Geeks", s);
+    /* provide integer as arguments */
+    LOG_MESSAGE(INFO, STD_OUT, "%d + %d = %d", 10, 20, (10 + 20));
+    return 0;
+}
+  
+3)Multiline macros in C
+ In this article, we will discuss how to write a multi-line macro. We can write multi-line macro same like function, but each statement ends 
+ with “\”. 
+ In multi line macro do while is used as above example because below code throws error,macro.c: In function ‘main’:
+macro.c:19:2: error: ‘else’ without a previous ‘if’
+make: *** [macro] Error 1.
+
+ #include <stdio.h>
+ 
+#define MACRO(num, str) {\
+            printf("%d", num);\
+            printf(" is");\
+            printf(" %s number", str);\
+            printf("\n");\
+           }
+ 
+int main(void)
+{
+    int num;
+ 
+    printf("Enter a number: ");
+    scanf("%d", &num);
+ 
+    if (num & 1)
+        MACRO(num, "Odd");
+    else
+        MACRO(num, "Even");
+ 
+    return 0;
+}
+
+4)The OFFSETOF() macro
+#define OFFSETOF(TYPE, ELEMENT) ((size_t)&(((TYPE *)0)->ELEMENT))
+Zero is casted to type of structure and required element’s address is accessed, which is casted to size_t. As per standard size_t is of type 
+unsigned int. The overall expression results in the number of bytes after which the ELEMENT being placed in the structure.
+
+Since we are considering 0 as address of the structure variable, c will be placed after 16 bytes of its base address i.e. 0x00 + 0x10. 
+Applying & on the structure element (in this case it is c) returns the address of the element which is 0x10. Casting the address to unsigned 
+int (size_t) results in number of bytes the element is placed in the structure.
+
+5)CRASH() macro – interpretation
+So the given code is invoking the function whose code is stored at location zero, in other words, trying to execute an instruction stored at 
+location zero. On systems with memory protection (MMU) the OS will throw an exception (segmentation fault) and on systems without such 
+protection (small embedded systems), it will execute and error will propagate further.
+
+NOTE:
+“a##b” prints concatenation of ‘a’ and ‘b’.
+
+6)isgraph() C library function
+#include <ctype.h>
+int isgraph(int ch);
+Return Value – function returns nonzero if ch is any printable character other than a space, else it returns 0.
+For ASCII environments, printable characters are in the range of 0X21 through 0X7E.
+
+7)Creating Header Files
+ The ” ” here are used to instructs the preprocessor to look into the present folder and into the standard folder of all header files if not 
+ found in present folder. So, if you wish to use angular brackets instead of ” ” to include your header file you can save it in the standard 
+ folder of header files otherwise.
+ 
+8)difftime() C library function
+#include <time.h>
+int main()
+{
+    int sec;
+    time_t time1, time2;
+ 
+    // Current time
+    time(&time1); 
+    for (sec = 1; sec <= 6; sec++) 
+        sleep(1);
+     
+    // time after sleep in loop.
+    time(&time2);
+    printf("Difference is  %.2f seconds", 
+                 difftime(time2, time1));
+ 
+    return 0;
+}
+
+9)_Generic keyword in C
+#include <stdio.h>
+#define geeks(T) _Generic( (T), char: 1, int: 2, long: 3, default: 0)
+int main(void)
+{
+    // char returns ASCII value which is int type. 
+    printf("%d\n", geeks('A')); 
+  
+    // Here A is a string.
+    printf("%d",geeks("A"));
+     
+    return 0;
+}
+
+10)10)C Library math.h functions
+ The math.h header defines various mathematical functions and one macro. All the functions available in this library take double as an
+ argument and return double as the result.
+ 
+ 1. double ceil(double x): The C library function double ceil(double x) returns the smallest integer value greater than or equal to x.
+ 2. double floor(double x): The C library function double floor(double x) returns the largest integer value less than or equal to x.
+ 3. double fabs(double x): The C library function double fabs(double x) returns the absolute value of x.
+ 4. double log(double x): The C library function double log(double x) returns the natural logarithm (base-e logarithm) of x.
+ 5. double log10(double x): The C library function double log10(double x) returns the common logarithm (base-10 logarithm) of x.
+ 6. double fmod(double x, double y) : The C library function double fmod(double x, double y) returns the remainder of x divided by y.
+ 7. double sqrt(double x): The C library function double sqrt(double x) returns the square root of x.
+ 8. double pow(double x, double y): The C library function double pow(double x, double y) returns x raised to the power of y i.e. xy.
+ 9. double modf(double x, double *integer): The C library function double modf(double x, double *integer) returns the fraction component
+   (part after the decimal), and sets integer to the integer component.
+ 10. double exp(double x): The C library function double exp(double x) returns the value of e raised to the xth power.
+ 11. double cos(double x) : The C library function double cos(double x) returns the cosine of a radian angle x.
+ 12. double acos(double x) : The C library function double acos(double x) returns the arc cosine of x in radians.
+ 13. double tanh(double x): The C library function double tanh(double x) returns the hyperbolic tangent of x.
+ 
+NOTE:
+strftime() function in C/C++
+strftime() is a function in C which is used to format date and time. It comes under the header file time.h, which also contains a structure named struct tm which is used to hold the time and date. The syntax of strftime() is as shown below :
+
+size_t strftime(char *s, size_t max, const char *format, 
+                                          const struct tm *tm); 
+strftime() function formats the broken-down time tm according to the formatting rules specified in format and store it in character array s.
+
+Some format specifiers for strftime() are shown as follows :
+%x = Preferred date representation
+%I = Hour as a decimal number (12-hour clock).
+%M = Minutes in decimal ranging from 00 to 59.
+%p = Either “AM” or “PM” according to the given time value, etc.
+%a = Abbreviated weekday name
+%A = Full weekday name
+%b = Abbreviated month name
+%B = Full month name	March
+%c = Date and time representation
+%d = Day of the month (01-31)
+%H = Hour in 24h format (00-23)
+%I = Hour in 12h format (01-12)
+%j = Day of the year (001-366)
+%m = Month as a decimal number (01-12)
+%M = Minute (00-59)
+
+Structure struct tm is defined in time.h as follows :
+
+struct tm 
+{
+   int tm_sec;         // seconds
+   int tm_min;         // minutes
+   int tm_hour;        // hours
+   int tm_mday;        // day of the month
+   int tm_mon;         // month
+   int tm_year;        // The number of years since 1900
+   int tm_wday;        // day of the week
+   int tm_yday;        // day in the year
+   int tm_isdst;       // daylight saving time	
+};
+// C program to demonstrate the 
+// working of strftime()
+#include <stdlib.h>
+#include <stdio.h>
+#include <time.h> 
+#define Size 50
+ 
+int main ()
+{
+    time_t t ;
+    struct tm *tmp ;
+    char MY_TIME[Size];
+    time( &t );
+     
+    //localtime() uses the time pointed by t ,
+    // to fill a tm structure with the 
+    // values that represent the 
+    // corresponding local time.
+     
+    tmp = localtime( &t );
+     
+    // using strftime to display time
+    strftime(MY_TIME, sizeof(MY_TIME), "%x - %I:%M%p", tmp);
+     
+    printf("Formatted date & time : %s\n", MY_TIME );
+    return(0);
+}
+Run on IDE
+Formatted date & time : 03/20/17 - 02:55PM
+
+11)
+A Preprocessor mainly performs three tasks on the HLL code :
+1.Removing comments : gcc -E prog.c
+This file is saved with a ‘.i’ extension (prog.i) which will be input to the compiler.
+2.File inclusion :
+    Header File or Standard files: 
+          #include< file_name >
+    user defined files: 
+          #include"filename"
+          
+3.Macro expansion :Macros with arguments:
+NOTE:
+There are two types of macros: Object-like (do not take parameters) and function-like (Can take parameters).
+You can delete a macro definition with #undef
+
+4.Conditional Compilation: 
+     ‘ifdef‘ and ‘endif‘,#ifndef-#endif,#if-#elif-#else-#endif.
+
+Other directives: Apart from the above directives there are two more directives which are not commonly used. These are:
+
+#undef Directive: The #undef directive is used to undefine an existing macro. This directive works as:
+
+#undef LIMIT 
+
+Using this statement will undefine the existing macro LIMIT. After this statement every “#ifdef LIMIT” statement will evaluate to false.
+
+#pragma Directive: This directive is a special purpose directive and is used to turn on or off some features. This type of directives are 
+  compiler-specific i.e., they vary from compiler to compiler. Some of the #pragma directives are discussed below:
+
+#pragma startup and #pragma exit: These directives helps us to specify the functions that are needed to run before program startup
+( before the control passes to main()) and just before program exit (just before the control returns from main()).
+Note: Below program will not work with GCC compilers.
+Look at the below program:
+
+#include<stdio.h>
+
+void func1();
+void func2();
+
+#pragma startup func1
+#pragma exit func2
+
+void func1()
+{
+    printf("Inside func1()\n");
+}
+
+void func2()
+{
+    printf("Inside func2()\n");   
+}
+
+int main()
+
+{
+    printf("Inside main()\n");
+    return 0;
+
+}
+
+Run on IDE
+
+Output:
+
+Inside func1() Inside main() Inside func2() 
+
+The above code will produce the output as given below when run on GCC compilers:
+
+Inside main() 
+This happens because GCC does not supports #pragma startup or exit. However you can use the below code for a similar output on GCC compilers.
+
+#include<stdio.h>
+
+void func1();
+void func2();
+void _attribute_((constructor)) func1();
+void _attribute_((destructor)) func2();
+
+void func1()
+{
+    printf("Inside func1()\n");
+}
+void func2()
+{
+    printf("Inside func2()\n"); 
+}
+int main()
+{
+    printf("Inside main()\n");
+    return 0;
+}
+
+Run on IDE
+#pragma warn Directive:This directive is used to hide the warning message which are displayed during compilation.
+We can hide the warnings as shown below:
+
+#pragma warn -rvl: This directive hides those warning which are raised when a function which is supposed to return a value does not returns a value.#pragma warn -par: This directive hides those warning which are raised when a function does not uses the parameters passed to it.#pragma warn -rch: This directive hides those warning which are raised when a code is unreachable. For example: any code written after the returnstatement in a function is unreachable
+ 
+Line control ( #line ):
+ Whenever we compile a program, there are chances of occurrence of some error in the program. Whenever compiler identifies error in the 
+ program it provides us with the filename in which error is found along with the list of lines and with the exact line numbers where the 
+ error is. This makes easy for us to find and rectify error. However we can control what information should the compiler provide during 
+ errors in compilation using the #line directive.
+Syntax:
+ #line number "filename"
+  number – line number that will be assigned to the next code line. The line numbers of successive lines will be increased one by one from 
+  this point on.“filename” – optional parameter that allows to redefine the file name that will be shown.
+
+Error directive ( #error ):
+ This directive aborts the compilation process when it is found in the program during compilation and produces 
+ an error which is optional and can be specified as a parameter.
+Syntax:
+ #error optional_error
